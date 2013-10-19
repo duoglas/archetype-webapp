@@ -1,0 +1,174 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd"
+       default-autowire="byName" default-lazy-init="false">
+
+
+    <!-- 扫描所有的dao、service -->
+    <context:component-scan base-package="me.plzbite">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <context:annotation-config/>
+
+
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:config/jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--
+    ========================================================================
+    iBatis config
+    =========================================================================
+-->
+
+    <bean id="dataSourceW" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName">
+            <value>${jdbcW.driver}</value>
+        </property>
+        <property name="url">
+            <value>${jdbcW.url}</value>
+        </property>
+        <property name="username">
+            <value>${jdbcW.username}</value>
+        </property>
+        <property name="password">
+            <value>${jdbcW.password}</value>
+        </property>
+        <property name="maxActive">
+            <value>20</value>
+        </property>
+        <property name="maxIdle">
+            <value>3</value>
+        </property>
+        <property name="maxWait">
+            <value>30000</value>
+        </property>
+        <property name="defaultAutoCommit">
+            <value>true</value>
+        </property>
+        <property name="testOnBorrow">
+            <value>true</value>
+        </property>
+        <property name="testWhileIdle">
+            <value>true</value>
+        </property>
+        <property name="validationQuery">
+            <value>select 1 ;</value>
+        </property>
+    </bean>
+
+    <bean id="ibatisConfigClasspathResourceW" class="org.springframework.core.io.ClassPathResource">
+        <constructor-arg>
+            <value>ibatis-mapping/sql-map-config.xml</value>
+        </constructor-arg>
+    </bean>
+    <bean id="sqlMapClientW" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation">
+            <ref bean="ibatisConfigClasspathResourceW"/>
+        </property>
+        <property name="dataSource">
+            <ref bean="dataSourceW"/>
+        </property>
+    </bean>
+
+    <bean id="sqlMapClientTemplateW" class=" org.springframework.orm.ibatis.SqlMapClientTemplate">
+        <property name="sqlMapClient">
+            <ref bean="sqlMapClientW"/>
+        </property>
+    </bean>
+
+    <bean id="jdbcTemplateW" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource">
+            <ref bean="dataSourceW"/>
+        </property>
+    </bean>
+
+    <bean id="dataSourceR" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName">
+            <value>${jdbcR.driver}</value>
+        </property>
+        <property name="url">
+            <value>${jdbcR.url}</value>
+        </property>
+        <property name="username">
+            <value>${jdbcR.username}</value>
+        </property>
+        <property name="password">
+            <value>${jdbcR.password}</value>
+        </property>
+        <property name="maxActive">
+            <value>20</value>
+        </property>
+        <property name="maxIdle">
+            <value>3</value>
+        </property>
+        <property name="maxWait">
+            <value>30000</value>
+        </property>
+        <property name="defaultAutoCommit">
+            <value>true</value>
+        </property>
+        <property name="testOnBorrow">
+            <value>true</value>
+        </property>
+        <property name="testWhileIdle">
+            <value>true</value>
+        </property>
+        <property name="validationQuery">
+            <value>select 1 ;</value>
+        </property>
+    </bean>
+
+    <bean id="ibatisConfigClasspathResourceR" class="org.springframework.core.io.ClassPathResource">
+        <constructor-arg>
+            <value>ibatis-mapping/sql-map-config.xml</value>
+        </constructor-arg>
+    </bean>
+    <bean id="sqlMapClientR" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation">
+            <ref bean="ibatisConfigClasspathResourceR"/>
+        </property>
+        <property name="dataSource">
+            <ref bean="dataSourceR"/>
+        </property>
+    </bean>
+
+    <bean id="sqlMapClientTemplateR" class=" org.springframework.orm.ibatis.SqlMapClientTemplate">
+        <property name="sqlMapClient">
+            <ref bean="sqlMapClientR"/>
+        </property>
+    </bean>
+
+    <bean id="jdbcTemplateR" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource">
+            <ref bean="dataSourceR"/>
+        </property>
+    </bean>
+
+
+    <bean id="transactionManagerR"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource">
+            <ref local="dataSourceR"/>
+        </property>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManagerR"/>
+
+
+</beans>
